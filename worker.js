@@ -66,7 +66,63 @@ export default {
     })());
   },
 
-  async fetch(request, env) {
+    async fetch(request, env) {
+    const url = new globalThis.URL(request.url);
+    const headers = { "Cache-Control": "no-store" };
+
+    if (request.method !== "GET") {
+      return new Response("Méthode non autorisée", {
+        status: 405,
+        headers
+      });
+    }
+
+    if (url.pathname === "/samples") {
+      if (!env.EXPORT_TOKEN ||
+          request.headers.get("Authorization") !==
+            `Bearer ${env.EXPORT_TOKEN}`) {
+        return new Response("Accès refusé", {
+          status: 401,
+          headers
+        });
+      }
+
+      const after = Number(url.searchParams.get("after") || "0");
+      if (!Number.isSafeInteger(after) || after < 0) {
+        return new Response("Paramètre invalide", {
+          status: 400,
+          headers
+        });
+      }
+
+      const result = await env.DB.prepare(
+        `SELECT id, received_ms, source_ms, bid, ask,
+                source, status, latency_ms, error
+         FROM market_samples
+         WHERE id > ?
+         ORDER BY id ASC
+         LIMIT 500`
+      ).bind(after).all();
+
+      const samples = result.results || [];
+      return Response.json({
+        samples,
+        next: samples.length
+          ? samples[samples.length - 1].id
+          : after
+      }, { headers });
+    }
+
+    const latest = await env.DB.prepare(
+      "SELECT received_ms, status FROM market_samples ORDER BY id DESC LIMIT 1"
+    ).first();
+
+    return Response.json({
+      collector: "Gold Radar",
+      latest: latest || null
+    }, { headers });
+  }
+};
     const latest = await env.DB.prepare(
       "SELECT received_ms, status FROM market_samples ORDER BY id DESC LIMIT 1"
     ).first();
