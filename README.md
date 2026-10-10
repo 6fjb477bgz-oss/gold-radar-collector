@@ -1,1 +1,1 @@
-# gold-radar-collector
+Installation Cloudflare en cours.
