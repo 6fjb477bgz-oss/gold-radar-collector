@@ -2,3 +2,7 @@ name = "gold-radar-collector"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 workers_dev = true
+[[d1_databases]]
+binding = "DB"
+database_name = "gold-radar-data"
+database_id = "a0fb3bb6-1216-4b67-91e7-cc9c50eff4d4"
