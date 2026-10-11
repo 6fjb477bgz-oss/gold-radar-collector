@@ -123,15 +123,8 @@ export default {
     }, { headers });
   }
 };
-    const latest = await env.DB.prepare(
-      "SELECT received_ms, status FROM market_samples ORDER BY id DESC LIMIT 1"
-    ).first();
+    
 
-    return Response.json({
-      collector: "Gold Radar",
-      latest: latest || null
-    }, {
-      headers: { "Cache-Control": "no-store" }
-    });
-  }
-};
+
+      
+
